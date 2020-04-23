@@ -55,8 +55,10 @@ class Hexapawn(TwoPlayersGame):
 
             self.switch_player()
 
-            time = timer() - start
-            if time < 100:
+            time = round(timer() - start, 5)
+
+            print("Time to take move = ", time)
+            if time < 5:
                 times.append(time)
         times.append(time)
         history.append(deepcopy(self))
@@ -104,35 +106,44 @@ if __name__ == "__main__":
     from easyAI import AI_Player, Human_Player, Negamax
     import matplotlib.pyplot as plt
     import numpy as np
+    wins = []
 
-    scoring = lambda game: -100 if game.lose() else 0
-    ai = Negamax(10, scoring)
-    game = Hexapawn([AI_Player(ai), AI_Player(ai)])
-    play_game = game.play()
-    history, times = play_game
+    for i in range(10):
+        scoring = lambda game: -100 if game.lose() else 0
+        ai = Negamax(10, scoring)
+        game = Hexapawn([AI_Player(ai), AI_Player(ai)])
+        play_game = game.play()
+        history, times = play_game
 
-    player1_time = []
-    player2_time = []
-    couter = 1
-    for item in times:
-        if couter % 2 == 0:
-            player2_time.append(item)
+        player1_time = []
+        player2_time = []
+        couter = 1
+        for item in times:
+            if couter % 2 == 0:
+                player2_time.append(item)
+            else:
+                player1_time.append(item)
+
+            couter += 1
+
+        # plt.figure(1)
+        # plt.plot(player1_time)
+        # plt.xlabel("Move")
+        # plt.ylabel("Time [s]")
+        # plt.title("Time needed for AI to make move Player 1")
+        #
+        # plt.figure(2)
+        # plt.plot(player2_time)
+        # plt.xlabel("Move")
+        # plt.ylabel("Time [s]")
+        # plt.title("Time needed for AI to make move Player 2")
+        # plt.show()
+
+        print("player %d wins after %d turns " % (game.nopponent, game.nmove))
+
+        if game.nopponent < 2:
+            wins.append(1)
         else:
-            player1_time.append(item)
+            wins.append(2)
 
-        couter += 1
-
-    plt.figure(1)
-    plt.plot(player1_time)
-    plt.xlabel("Move")
-    plt.ylabel("Time [s]")
-    plt.title("Time needed for AI to make move Player 1")
-
-    plt.figure(2)
-    plt.plot(player2_time)
-    plt.xlabel("Move")
-    plt.ylabel("Time [s]")
-    plt.title("Time needed for AI to make move Player 2")
-    plt.show()
-
-    print("player %d wins after %d turns " % (game.nopponent, game.nmove))
+    print(wins)
