@@ -1,8 +1,8 @@
-from copy import deepcopy
+from copy import deepcopy, copy
 
 from easyAI import TwoPlayersGame
 from timeit import default_timer as timer
-from random import randint
+from random import randint, randrange
 
 # Convert D7 to (3,6) and back...
 to_string = lambda move: " ".join(["ABCDEFGHIJ"[move[i][0]] + str(move[i][1] + 1)
@@ -24,11 +24,13 @@ class Hexapawn(TwoPlayersGame):
             players[i].direction = d
             players[i].goal_line = goal
             players[i].pawns = pawns
+            players[i].starting_spaws = copy(pawns)
+            players[i].respawn_places = []
 
         self.players = players
-        random_player = randint(1,2)
+        random_player = randint(1, 2)
         self.nplayer = random_player
-        
+
     def play(self, nmoves=1000, verbose=True):
 
         history = []
@@ -64,7 +66,6 @@ class Hexapawn(TwoPlayersGame):
         history.append(deepcopy(self))
         return history, times
 
-
     def possible_moves(self):
         moves = []
         opponent_pawns = self.opponent.pawns
@@ -83,9 +84,17 @@ class Hexapawn(TwoPlayersGame):
         move = list(map(to_tuple, move.split(' ')))
         ind = self.player.pawns.index(move[0])
         self.player.pawns[ind] = move[1]
-        if move[1] in self.opponent.pawns:
 
+        if move[1] in self.opponent.pawns:
+            self.opponent.respawn_places.append(self.opponent.starting_spaws[self.opponent.pawns.index(move[1])])
+            del self.opponent.starting_spaws[self.opponent.pawns.index(move[1])]
             self.opponent.pawns.remove(move[1])
+
+        if randrange(10) == 0 and len(self.player.respawn_places) > 0:
+            idx = randrange(len(self.player.respawn_places))
+            self.player.pawns.append(self.player.respawn_places[idx])
+            self.player.starting_spaws.append(copy(self.player.respawn_places[idx]))
+            del self.player.respawn_places[idx]
 
     def lose(self):
         return (any([i == self.opponent.goal_line
@@ -112,21 +121,21 @@ if __name__ == "__main__":
     for i in range(10):
 
         scoring = lambda game: -100 if game.lose() else 0
-        ai = Negamax(10, scoring)
+        ai = Negamax(8, scoring)
         game = Hexapawn([AI_Player(ai), AI_Player(ai)])
         play_game = game.play()
         history, times = play_game
 
         player1_time = []
         player2_time = []
-        couter = 1
+        index = 1
         for item in times:
-            if couter % 2 == 0:
+            if index % 2 == 0:
                 player2_time.append(item)
             else:
                 player1_time.append(item)
 
-            couter += 1
+            index += 1
 
         if i == 1:
             plt.figure(1)
@@ -149,4 +158,4 @@ if __name__ == "__main__":
         else:
             wins.append(2)
 
-    print(wins)
+    print("Wins table: ", wins)
