@@ -26,8 +26,9 @@ class Hexapawn(TwoPlayersGame):
             players[i].pawns = pawns
 
         self.players = players
-        self.nplayer = 1
-
+        random_player = randint(1,2)
+        self.nplayer = random_player
+        
     def play(self, nmoves=1000, verbose=True):
 
         history = []
@@ -47,7 +48,6 @@ class Hexapawn(TwoPlayersGame):
 
             # a = randint() * 10
 
-
             if verbose:
                 print("\nMove #%d: player %d plays %s :" % (
                       self.nmove, self.nplayer, str(move)))
@@ -63,6 +63,7 @@ class Hexapawn(TwoPlayersGame):
         times.append(time)
         history.append(deepcopy(self))
         return history, times
+
 
     def possible_moves(self):
         moves = []
@@ -109,6 +110,7 @@ if __name__ == "__main__":
     wins = []
 
     for i in range(10):
+
         scoring = lambda game: -100 if game.lose() else 0
         ai = Negamax(10, scoring)
         game = Hexapawn([AI_Player(ai), AI_Player(ai)])
@@ -126,22 +128,23 @@ if __name__ == "__main__":
 
             couter += 1
 
-        # plt.figure(1)
-        # plt.plot(player1_time)
-        # plt.xlabel("Move")
-        # plt.ylabel("Time [s]")
-        # plt.title("Time needed for AI to make move Player 1")
-        #
-        # plt.figure(2)
-        # plt.plot(player2_time)
-        # plt.xlabel("Move")
-        # plt.ylabel("Time [s]")
-        # plt.title("Time needed for AI to make move Player 2")
-        # plt.show()
+        if i == 1:
+            plt.figure(1)
+            plt.plot(player1_time)
+            plt.xlabel("Move")
+            plt.ylabel("Time [s]")
+            plt.title("Time needed for AI to make move Player 1")
+
+            plt.figure(2)
+            plt.plot(player2_time)
+            plt.xlabel("Move")
+            plt.ylabel("Time [s]")
+            plt.title("Time needed for AI to make move Player 2")
+            plt.show()
 
         print("player %d wins after %d turns " % (game.nopponent, game.nmove))
 
-        if game.nopponent < 2:
+        if game.nopponent == 1:
             wins.append(1)
         else:
             wins.append(2)
